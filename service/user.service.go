@@ -14,6 +14,8 @@ type UserService interface {
 	CreateUser(registerRequest dto.RegisterRequest) (*response.UserResponse, error)
 
 	FindUserByEmail(email string) (*response.UserResponse, error)
+
+	FindUserByID(userID string) (*response.UserResponse, error)
 }
 
 type userService struct {
@@ -57,4 +59,18 @@ func (s *userService) FindUserByEmail(email string) (*response.UserResponse, err
 
 	userResponse := response.NewUserResponse(user)
 	return userResponse, nil
+}
+
+func (s *userService) FindUserByID(userID string) (*response.UserResponse, error) {
+	user, err := s.userRepository.FindByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	userResponse := response.UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	}
+	return &userResponse, nil
 }
