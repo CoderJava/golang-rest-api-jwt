@@ -15,12 +15,15 @@ func main() {
 
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepository)
-	authHandler := v1.NewAuthHandler(userService)
+	authService := service.NewAuthService(userRepository)
+	jwtService := service.NewJWTService()
+	authHandler := v1.NewAuthHandler(userService, authService, jwtService)
 
 	server := gin.Default()
 	authRoutes := server.Group("api/auth")
 	{
 		authRoutes.POST("/register", authHandler.Register)
+		authRoutes.POST("/login", authHandler.Login)
 	}
 
 	server.Run()
