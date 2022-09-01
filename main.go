@@ -32,6 +32,7 @@ func main() {
 	userRoutes := server.Group("api/user")
 	{
 		userRoutes.GET("/profile", userHandler.Profile)
+		userRoutes.PUT("/profile", userHandler.Update)
 	}
 
 	server.Run()
