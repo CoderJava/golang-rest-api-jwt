@@ -16,6 +16,8 @@ type UserService interface {
 	FindUserByEmail(email string) (*response.UserResponse, error)
 
 	FindUserByID(userID string) (*response.UserResponse, error)
+
+	UpdateUser(updateUserRequest dto.UpdateUserRequest) (*response.UserResponse, error)
 }
 
 type userService struct {
@@ -73,4 +75,20 @@ func (s *userService) FindUserByID(userID string) (*response.UserResponse, error
 		Email: user.Email,
 	}
 	return &userResponse, nil
+}
+
+func (s *userService) UpdateUser(updateUserRequest dto.UpdateUserRequest) (*response.UserResponse, error) {
+	user := entity.User{
+		ID:    updateUserRequest.ID,
+		Name:  updateUserRequest.Name,
+		Email: updateUserRequest.Email,
+	}
+
+	user, err := s.userRepository.UpdateUser(user)
+	if err != nil {
+		return nil, err
+	}
+
+	response := response.NewUserResponse(user)
+	return response, nil
 }
