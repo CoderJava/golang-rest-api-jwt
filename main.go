@@ -3,6 +3,7 @@ package main
 import (
 	"golang-rest-api-jwt/config"
 	v1 "golang-rest-api-jwt/handler/v1"
+	"golang-rest-api-jwt/middleware"
 	"golang-rest-api-jwt/repository"
 	"golang-rest-api-jwt/service"
 
@@ -29,7 +30,7 @@ func main() {
 		authRoutes.POST("/login", authHandler.Login)
 	}
 
-	userRoutes := server.Group("api/user")
+	userRoutes := server.Group("api/user", middleware.AuthorizeJWT(jwtService))
 	{
 		userRoutes.GET("/profile", userHandler.Profile)
 		userRoutes.PUT("/profile", userHandler.Update)
