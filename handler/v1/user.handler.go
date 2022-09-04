@@ -36,8 +36,7 @@ func (h *userHandler) Profile(ctx *gin.Context) {
 	header := ctx.GetHeader("Authorization")
 	bearerToken := strings.Split(header, " ")
 	if len(bearerToken) < 2 {
-		response := response.BuildErrorResponse("Error", "Token not provided", obj.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusForbidden, response)
+		// sudah dihandle didalam auth.middleware.go
 		return
 	}
 
@@ -102,8 +101,7 @@ func (h *userHandler) getUserIDByHeader(ctx *gin.Context) string {
 	header := ctx.GetHeader("Authorization")
 	bearerToken := strings.Split(header, " ")
 	if len(bearerToken) < 2 {
-		response := response.BuildErrorResponse("Error", "Token not provided", obj.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusForbidden, response)
+		// sudah dihandle didalam auth.middleware.go
 		return ""
 	}
 
