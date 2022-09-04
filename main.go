@@ -15,13 +15,16 @@ func main() {
 	defer config.CloseDatabaseConnection(db)
 
 	userRepository := repository.NewUserRepository(db)
+	productRepository := repository.NewProductRepository(db)
 
 	userService := service.NewUserService(userRepository)
 	authService := service.NewAuthService(userRepository)
 	jwtService := service.NewJWTService()
+	productService := service.NewProductService(productRepository)
 
 	authHandler := v1.NewAuthHandler(userService, authService, jwtService)
 	userHandler := v1.NewUserHandler(userService, jwtService)
+	productHandler := v1.NewProductHandler(productService, jwtService)
 
 	server := gin.Default()
 	authRoutes := server.Group("api/auth")
@@ -34,6 +37,11 @@ func main() {
 	{
 		userRoutes.GET("/profile", userHandler.Profile)
 		userRoutes.PUT("/profile", userHandler.Update)
+	}
+
+	productRoutes := server.Group("api/product", middleware.AuthorizeJWT(jwtService))
+	{
+		productRoutes.POST("/", productHandler.CreateProduct)
 	}
 
 	server.Run()
