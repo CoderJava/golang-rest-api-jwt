@@ -17,3 +17,17 @@ func NewProductResponse(product entity.Product) *ProductResponse {
 		User:        *NewUserResponse(product.User),
 	}
 }
+
+func NewProductArrayResponse(product []entity.Product) *[]ProductResponse {
+	listProductResponse := []ProductResponse{}
+	for _, element := range product {
+		productResponse := ProductResponse{
+			ID:          element.ID,
+			ProductName: element.Name,
+			Price:       element.Price,
+			User:        *NewUserResponse(element.User),
+		}
+		listProductResponse = append(listProductResponse, productResponse)
+	}
+	return &listProductResponse
+}
