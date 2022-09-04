@@ -42,6 +42,7 @@ func main() {
 	productRoutes := server.Group("api/product", middleware.AuthorizeJWT(jwtService))
 	{
 		productRoutes.POST("/", productHandler.CreateProduct)
+		productRoutes.GET("/", productHandler.All)
 	}
 
 	server.Run()
