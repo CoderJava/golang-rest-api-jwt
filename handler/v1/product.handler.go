@@ -15,6 +15,8 @@ import (
 
 type ProductHandler interface {
 	CreateProduct(ctx *gin.Context)
+
+	All(ctx *gin.Context)
 }
 
 type productHandler struct {
@@ -40,8 +42,7 @@ func (h *productHandler) CreateProduct(ctx *gin.Context) {
 	authHeader := ctx.GetHeader("Authorization")
 	bearer := strings.Split(authHeader, " ")
 	if len(bearer) < 2 {
-		response := response.BuildErrorResponse("Failed to process request", "No token provided", nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		// sudah dihandle didalam auth.middleware.go
 		return
 	}
 
@@ -59,4 +60,28 @@ func (h *productHandler) CreateProduct(ctx *gin.Context) {
 
 	response := response.BuildSuccessResponse(true, "Success", productResponse)
 	ctx.JSON(http.StatusCreated, response)
+}
+
+func (h *productHandler) All(ctx *gin.Context) {
+	authHeader := ctx.GetHeader("Authorization")
+	bearer := strings.Split(authHeader, " ")
+	if len(bearer) < 2 {
+		// sudah dihandle didalam auth.middleware.go
+		return
+	}
+
+	bearerToken := bearer[1]
+	token := h.jwtService.ValidateToken(bearerToken, ctx)
+	claims := token.Claims.(jwt.MapClaims)
+	userID := fmt.Sprintf("%v", claims["user_id"])
+
+	products, err := h.productService.All(userID)
+	if err != nil {
+		response := response.BuildErrorResponse("Failed to process request", err.Error(), obj.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := response.BuildSuccessResponse(true, "Success", products)
+	ctx.JSON(http.StatusOK, response)
 }
