@@ -10,6 +10,8 @@ import (
 
 type ProductService interface {
 	CreateProduct(productRequest dto.CreateProductRequest, userID string) (*response.ProductResponse, error)
+
+	All(userID string) (*[]response.ProductResponse, error)
 }
 
 type productService struct {
@@ -44,4 +46,14 @@ func (s *productService) CreateProduct(
 
 	response := response.NewProductResponse(resultInsertProduct)
 	return response, nil
+}
+
+func (s *productService) All(userID string) (*[]response.ProductResponse, error) {
+	allProductEntity, err := s.productRepository.All(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	allProductResponse := response.NewProductArrayResponse(allProductEntity)
+	return allProductResponse, nil
 }
