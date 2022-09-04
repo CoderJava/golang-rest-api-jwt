@@ -38,6 +38,7 @@ func (h *userHandler) Profile(ctx *gin.Context) {
 	if len(bearerToken) < 2 {
 		response := response.BuildErrorResponse("Error", "Token not provided", obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusForbidden, response)
+		return
 	}
 
 	token := h.jwtService.ValidateToken(bearerToken[1], ctx)
@@ -45,6 +46,7 @@ func (h *userHandler) Profile(ctx *gin.Context) {
 	if token == nil {
 		response := response.BuildErrorResponse("Error", "Failed to validate token", obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -54,6 +56,7 @@ func (h *userHandler) Profile(ctx *gin.Context) {
 	if err != nil {
 		response := response.BuildErrorResponse("Error", err.Error(), obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
 	}
 
 	response := response.BuildSuccessResponse(true, "Success", user)
@@ -66,18 +69,21 @@ func (h *userHandler) Update(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&updateUserRequest); err != nil {
 		response := response.BuildErrorResponse("Failed to process request", err.Error(), obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
 	}
 
 	strUserID := h.getUserIDByHeader(ctx)
 	if strUserID == "" {
 		response := response.BuildErrorResponse("Error", "Failed to validate token", obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
 	}
 
 	userID, err := strconv.ParseInt(strUserID, 0, 64)
 	if err != nil {
 		response := response.BuildErrorResponse("Error", "Failed to convert user ID to integer", obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		return
 	}
 
 	updateUserRequest.ID = userID
@@ -85,6 +91,7 @@ func (h *userHandler) Update(ctx *gin.Context) {
 	if err != nil {
 		response := response.BuildErrorResponse("Error", err.Error(), obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		return
 	}
 
 	response := response.BuildSuccessResponse(true, "Success", resultUpdateUser)
@@ -97,12 +104,14 @@ func (h *userHandler) getUserIDByHeader(ctx *gin.Context) string {
 	if len(bearerToken) < 2 {
 		response := response.BuildErrorResponse("Error", "Token not provided", obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusForbidden, response)
+		return ""
 	}
 
 	token := h.jwtService.ValidateToken(bearerToken[1], ctx)
 	if token == nil {
 		response := response.BuildErrorResponse("Error", "Failed to validate token", obj.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return ""
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
