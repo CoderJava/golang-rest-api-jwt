@@ -17,6 +17,8 @@ type ProductHandler interface {
 	CreateProduct(ctx *gin.Context)
 
 	All(ctx *gin.Context)
+
+	FindOneProductByID(ctx *gin.Context)
 }
 
 type productHandler struct {
@@ -83,5 +85,18 @@ func (h *productHandler) All(ctx *gin.Context) {
 	}
 
 	response := response.BuildSuccessResponse(true, "Success", products)
+	ctx.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) FindOneProductByID(ctx *gin.Context) {
+	productID := ctx.Param("id")
+	result, err := h.productService.FindOneProductByID(productID)
+	if err != nil {
+		response := response.BuildErrorResponse("Failed to process request", err.Error(), obj.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := response.BuildSuccessResponse(true, "Success", result)
 	ctx.JSON(http.StatusOK, response)
 }
