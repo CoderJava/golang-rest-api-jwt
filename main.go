@@ -43,6 +43,7 @@ func main() {
 	{
 		productRoutes.POST("/", productHandler.CreateProduct)
 		productRoutes.GET("/", productHandler.All)
+		productRoutes.GET("/:id", productHandler.FindOneProductByID)
 	}
 
 	server.Run()
