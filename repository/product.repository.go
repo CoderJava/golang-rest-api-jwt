@@ -10,6 +10,8 @@ type ProductRepository interface {
 	InsertProduct(product entity.Product) (entity.Product, error)
 
 	All(userID string) ([]entity.Product, error)
+
+	FindOneProductByID(productID string) (entity.Product, error)
 }
 
 type productRepository struct {
@@ -34,4 +36,13 @@ func (r *productRepository) All(userID string) ([]entity.Product, error) {
 		Where("user_id = ?", userID).
 		Find(&products)
 	return products, nil
+}
+
+func (r *productRepository) FindOneProductByID(productID string) (entity.Product, error) {
+	var product entity.Product
+	result := r.db.Preload("User").Where("id = ?", productID).Take(&product)
+	if result.Error != nil {
+		return product, result.Error
+	}
+	return product, nil
 }
