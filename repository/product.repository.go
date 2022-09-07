@@ -12,6 +12,8 @@ type ProductRepository interface {
 	All(userID string) ([]entity.Product, error)
 
 	FindOneProductByID(productID string) (entity.Product, error)
+
+	UpdateProduct(product entity.Product) (entity.Product, error)
 }
 
 type productRepository struct {
@@ -44,5 +46,11 @@ func (r *productRepository) FindOneProductByID(productID string) (entity.Product
 	if result.Error != nil {
 		return product, result.Error
 	}
+	return product, nil
+}
+
+func (r *productRepository) UpdateProduct(product entity.Product) (entity.Product, error) {
+	r.db.Save(&product)
+	r.db.Preload("User").Find(&product)
 	return product, nil
 }
