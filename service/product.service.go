@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"golang-rest-api-jwt/dto"
 	"golang-rest-api-jwt/entity"
 	"golang-rest-api-jwt/repository"
@@ -14,6 +15,8 @@ type ProductService interface {
 	All(userID string) (*[]response.ProductResponse, error)
 
 	FindOneProductByID(productID string) (*response.ProductResponse, error)
+
+	UpdateProduct(updateProductRequest dto.UpdateProductRequest, userID string) (*response.ProductResponse, error)
 }
 
 type productService struct {
@@ -67,5 +70,37 @@ func (s *productService) FindOneProductByID(productID string) (*response.Product
 	}
 
 	result := response.NewProductResponse(productEntity)
+	return result, nil
+}
+
+func (s *productService) UpdateProduct(
+	updateProductRequest dto.UpdateProductRequest,
+	userID string,
+) (*response.ProductResponse, error) {
+	strProductID := strconv.Itoa(int(updateProductRequest.ID))
+	productEntity, err := s.productRepository.FindOneProductByID(strProductID)
+	if err != nil {
+		return nil, err
+	}
+
+	intUserID, err := strconv.ParseInt(userID, 0, 64)
+	if err != nil {
+		return nil, err
+	} else if intUserID != productEntity.UserID {
+		return nil, errors.New("this product is not yours")
+	}
+
+	updateProductEntity := entity.Product{
+		ID:     updateProductRequest.ID,
+		Name:   updateProductRequest.Name,
+		Price:  updateProductRequest.Price,
+		UserID: intUserID,
+	}
+	updateProductEntity, err = s.productRepository.UpdateProduct(updateProductEntity)
+	if err != nil {
+		return nil, err
+	}
+
+	result := response.NewProductResponse(updateProductEntity)
 	return result, nil
 }
