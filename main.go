@@ -44,6 +44,7 @@ func main() {
 		productRoutes.POST("/", productHandler.CreateProduct)
 		productRoutes.GET("/", productHandler.All)
 		productRoutes.GET("/:id", productHandler.FindOneProductByID)
+		productRoutes.PUT("/:id", productHandler.UpdateProduct)
 	}
 
 	server.Run()
