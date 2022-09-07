@@ -12,6 +12,8 @@ type ProductService interface {
 	CreateProduct(productRequest dto.CreateProductRequest, userID string) (*response.ProductResponse, error)
 
 	All(userID string) (*[]response.ProductResponse, error)
+
+	FindOneProductByID(productID string) (*response.ProductResponse, error)
 }
 
 type productService struct {
@@ -56,4 +58,14 @@ func (s *productService) All(userID string) (*[]response.ProductResponse, error)
 
 	allProductResponse := response.NewProductArrayResponse(allProductEntity)
 	return allProductResponse, nil
+}
+
+func (s *productService) FindOneProductByID(productID string) (*response.ProductResponse, error) {
+	productEntity, err := s.productRepository.FindOneProductByID(productID)
+	if err != nil {
+		return nil, err
+	}
+
+	result := response.NewProductResponse(productEntity)
+	return result, nil
 }
