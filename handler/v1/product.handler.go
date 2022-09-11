@@ -22,6 +22,8 @@ type ProductHandler interface {
 	FindOneProductByID(ctx *gin.Context)
 
 	UpdateProduct(ctx *gin.Context)
+
+	DeleteProduct(ctx *gin.Context)
 }
 
 type productHandler struct {
@@ -139,5 +141,30 @@ func (h *productHandler) UpdateProduct(ctx *gin.Context) {
 	}
 
 	response := response.BuildSuccessResponse(true, "Success", productResponse)
+	ctx.JSON(http.StatusOK, response)
+}
+
+func (h *productHandler) DeleteProduct(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	authHeader := ctx.GetHeader("Authorization")
+	bearer := strings.Split(authHeader, " ")
+	if len(bearer) < 2 {
+		// sudah dihandle didalam auth.middleware.go
+		return
+	}
+	bearerToken := bearer[1]
+	token := h.jwtService.ValidateToken(bearerToken, ctx)
+	claims := token.Claims.(jwt.MapClaims)
+	userID := fmt.Sprintf("%v", claims["user_id"])
+
+	err := h.productService.DeleteProduct(id, userID)
+	if err != nil {
+		response := response.BuildErrorResponse("Failed to process request", err.Error(), obj.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := response.BuildSuccessResponse(true, "Success", obj.EmptyObj{})
 	ctx.JSON(http.StatusOK, response)
 }
