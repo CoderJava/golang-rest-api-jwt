@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"golang-rest-api-jwt/dto"
 	"golang-rest-api-jwt/entity"
 	"golang-rest-api-jwt/repository"
@@ -17,6 +18,8 @@ type ProductService interface {
 	FindOneProductByID(productID string) (*response.ProductResponse, error)
 
 	UpdateProduct(updateProductRequest dto.UpdateProductRequest, userID string) (*response.ProductResponse, error)
+
+	DeleteProduct(productID string, userID string) error
 }
 
 type productService struct {
@@ -103,4 +106,17 @@ func (s *productService) UpdateProduct(
 
 	result := response.NewProductResponse(updateProductEntity)
 	return result, nil
+}
+
+func (s *productService) DeleteProduct(productID string, userID string) error {
+	productEntity, err := s.productRepository.FindOneProductByID(productID)
+	if err != nil {
+		return err
+	}
+	if fmt.Sprintf("%d", productEntity.UserID) != userID {
+		return errors.New("this product is not yours")
+	}
+
+	s.productRepository.DeleteProduct(productID)
+	return nil
 }
