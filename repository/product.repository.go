@@ -14,6 +14,8 @@ type ProductRepository interface {
 	FindOneProductByID(productID string) (entity.Product, error)
 
 	UpdateProduct(product entity.Product) (entity.Product, error)
+
+	DeleteProduct(productID string) error
 }
 
 type productRepository struct {
@@ -53,4 +55,14 @@ func (r *productRepository) UpdateProduct(product entity.Product) (entity.Produc
 	r.db.Save(&product)
 	r.db.Preload("User").Find(&product)
 	return product, nil
+}
+
+func (r *productRepository) DeleteProduct(productID string) error {
+	var product entity.Product
+	result := r.db.Preload("User").Where("id = ?", productID).Take(&product)
+	if result.Error != nil {
+		return result.Error
+	}
+	r.db.Delete(&product)
+	return nil
 }
